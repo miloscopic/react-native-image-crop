@@ -14,7 +14,7 @@ import com.facebook.react.uimanager.events.RCTEventEmitter
 import java.io.File
 import java.util.*
 
-class ImageCropViewManager: SimpleViewManager<CropImageView>() {
+class ImageCropViewManager : SimpleViewManager<CropImageView>() {
     companion object {
         const val REACT_CLASS = "CropView"
         const val ON_IMAGE_SAVED = "onImageSaved"
@@ -23,12 +23,14 @@ class ImageCropViewManager: SimpleViewManager<CropImageView>() {
         const val ASPECT_RATIO_PROP = "cropAspectRatio"
         const val SAVE_IMAGE_COMMAND = 1
         const val ROTATE_IMAGE_COMMAND = 2
+        const val ROTATE_IMAGE_BY_DEGREES_COMMAND = 3
         const val SAVE_IMAGE_COMMAND_NAME = "saveImage"
         const val ROTATE_IMAGE_COMMAND_NAME = "rotateImage"
+        const val ROTATE_IMAGE_BY_DEGREES_COMMAND_NAME = "rotateImageByDegrees"
     }
 
     override fun createViewInstance(reactContext: ThemedReactContext): CropImageView {
-        val view =  CropImageView(reactContext)
+        val view = CropImageView(reactContext)
         view.setOnCropImageCompleteListener { _, result ->
             if (result.isSuccessful) {
                 val map = Arguments.createMap()
@@ -38,9 +40,9 @@ class ImageCropViewManager: SimpleViewManager<CropImageView>() {
                 map.putInt("width", result.cropRect!!.width())
                 map.putInt("height", result.cropRect!!.height())
                 reactContext.getJSModule(RCTEventEmitter::class.java)?.receiveEvent(
-                        view.id,
-                        ON_IMAGE_SAVED,
-                        map
+                    view.id,
+                    ON_IMAGE_SAVED,
+                    map
                 )
             }
         }
@@ -53,15 +55,16 @@ class ImageCropViewManager: SimpleViewManager<CropImageView>() {
 
     override fun getExportedCustomDirectEventTypeConstants(): MutableMap<String, Any> {
         return MapBuilder.of(
-                ON_IMAGE_SAVED,
-                MapBuilder.of("registrationName", ON_IMAGE_SAVED)
+            ON_IMAGE_SAVED,
+            MapBuilder.of("registrationName", ON_IMAGE_SAVED)
         )
     }
 
     override fun getCommandsMap(): MutableMap<String, Int> {
         return MapBuilder.of(
-                SAVE_IMAGE_COMMAND_NAME, SAVE_IMAGE_COMMAND,
-                ROTATE_IMAGE_COMMAND_NAME, ROTATE_IMAGE_COMMAND
+            SAVE_IMAGE_COMMAND_NAME, SAVE_IMAGE_COMMAND,
+            ROTATE_IMAGE_COMMAND_NAME, ROTATE_IMAGE_COMMAND,
+            ROTATE_IMAGE_BY_DEGREES_COMMAND_NAME, ROTATE_IMAGE_BY_DEGREES_COMMAND
         )
     }
 
@@ -84,6 +87,11 @@ class ImageCropViewManager: SimpleViewManager<CropImageView>() {
                 val clockwise = args?.getBoolean(0) ?: true
                 root.rotateImage(if (clockwise) 90 else -90)
             }
+
+            ROTATE_IMAGE_BY_DEGREES_COMMAND -> {
+                val degrees = args?.getDouble(0)?.toFloat() ?: 0f
+                root.rotateImageByDegrees(degrees)
+            }
         }
     }
 
@@ -91,6 +99,7 @@ class ImageCropViewManager: SimpleViewManager<CropImageView>() {
     fun setSourceUrl(view: CropImageView, url: String?) {
         url?.let {
             view.setImageUriAsync(Uri.parse(it))
+            view.rotateImageByDegrees(0f) // Reset rotation when setting a new image
         }
     }
 
@@ -103,7 +112,7 @@ class ImageCropViewManager: SimpleViewManager<CropImageView>() {
     fun setAspectRatio(view: CropImageView, aspectRatio: ReadableMap?) {
         if (aspectRatio != null) {
             view.setAspectRatio(aspectRatio.getInt("width"), aspectRatio.getInt("height"))
-        }else {
+        } else {
             view.clearAspectRatio()
         }
     }

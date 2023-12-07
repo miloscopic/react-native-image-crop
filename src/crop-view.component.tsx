@@ -43,11 +43,11 @@ class CropView extends React.PureComponent<Props> {
     );
   };
 
-  public rotateImage = (clockwise: boolean = true) => {
+  public rotateImage = (degrees: number) => {
     UIManager.dispatchViewManagerCommand(
       findNodeHandle(this.viewRef.current!),
       UIManager.getViewManagerConfig('CropView').Commands.rotateImage,
-      [clockwise]
+      [degrees]
     );
   };
 

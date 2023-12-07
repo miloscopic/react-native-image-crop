@@ -56,10 +56,18 @@ RCT_EXPORT_METHOD(saveImage:(nonnull NSNumber*) reactTag
     }];
 }
 
-RCT_EXPORT_METHOD(rotateImage:(nonnull NSNumber*) reactTag clockwise:(BOOL) clockwise) {
+RCT_EXPORT_METHOD(rotateImage:(nonnull NSNumber*) reactTag degrees:(CGFloat) degrees) {
     [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
         RCTCropView *cropView = (RCTCropView *)viewRegistry[reactTag];
-        [cropView rotateImage:clockwise];
+
+        // Convert degrees to radians
+        CGFloat radians = degrees * M_PI / 180.0;
+
+        // Apply a CGAffineTransform to rotate the image
+        cropView.transform = CGAffineTransformRotate(cropView.transform, radians);
+
+        // Notify the view that it needs to redraw
+        [cropView setNeedsDisplay];
     }];
 }
 
