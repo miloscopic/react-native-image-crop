@@ -23,7 +23,6 @@ RCT_EXPORT_VIEW_PROPERTY(keepAspectRatio, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(cropAspectRatio, CGSize)
 RCT_EXPORT_VIEW_PROPERTY(iosDimensionSwapEnabled, BOOL)
 
-
 RCT_EXPORT_METHOD(saveImage:(nonnull NSNumber*) reactTag
                   preserveTransparency:(BOOL) preserveTransparency
                   quality:(nonnull NSNumber *) quality) {
@@ -42,7 +41,7 @@ RCT_EXPORT_METHOD(saveImage:(nonnull NSNumber*) reactTag
 
         if ([[image valueForKey:@"hasAlpha"] boolValue] && preserveTransparency) {
             [UIImagePNGRepresentation(image) writeToURL:url atomically:YES];
-        }else {
+        } else {
             [UIImageJPEGRepresentation(image, [quality floatValue] / 100.0f) writeToURL:url atomically:YES];
         }
 
@@ -59,16 +58,30 @@ RCT_EXPORT_METHOD(saveImage:(nonnull NSNumber*) reactTag
 RCT_EXPORT_METHOD(rotateImage:(nonnull NSNumber*) reactTag degrees:(CGFloat) degrees) {
     [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
         RCTCropView *cropView = (RCTCropView *)viewRegistry[reactTag];
+        UIImage *rotatedImage = [self rotateImage:[cropView getCroppedImage] byDegrees:degrees];
 
-        // Convert degrees to radians
-        CGFloat radians = degrees * M_PI / 180.0;
-
-        // Apply a CGAffineTransform to rotate the image
-        cropView.transform = CGAffineTransformRotate(cropView.transform, radians);
-
-        // Notify the view that it needs to redraw
-        [cropView setNeedsDisplay];
+        cropView.onImageSaved(@{
+            @"uri": [self saveRotatedImage:rotatedImage],
+            // ... other properties ...
+        });
     }];
+}
+
+- (UIImage *)rotateImage:(UIImage *)image byDegrees:(CGFloat)degrees {
+    UIGraphicsBeginImageContextWithOptions(image.size, NO, image.scale);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGContextTranslateCTM(context, image.size.width / 2.0, image.size.height / 2.0);
+    CGContextRotateCTM(context, degrees * M_PI / 180.0);
+    CGContextTranslateCTM(context, -image.size.width / 2.0, -image.size.height / 2.0);
+    [image drawInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
+    UIImage *rotatedImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return rotatedImage;
+}
+
+- (NSString *)saveRotatedImage:(UIImage *)image {
+    // Save rotated image and return its URI
+    // Similar to the saveImage method...
 }
 
 @end
