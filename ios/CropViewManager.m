@@ -1,9 +1,7 @@
+// CropViewManager.m
+// react-native-image-crop
 //
-//  CropViewManager.m
-//  react-native-image-crop-tools
-//
-//  Created by Hunaid Hassan on 31/12/2019.
-//
+// Created by Milos Copic on 7/12/2023.
 
 #import "CropViewManager.h"
 #import "RCTCropView.h"
@@ -13,7 +11,7 @@
 
 RCT_EXPORT_MODULE()
 
--(UIView *)view {
+- (UIView *)view {
     return [[RCTCropView alloc] init];
 }
 
@@ -58,52 +56,16 @@ RCT_EXPORT_METHOD(saveImage:(nonnull NSNumber*) reactTag
 RCT_EXPORT_METHOD(rotateImage:(nonnull NSNumber*) reactTag degrees:(CGFloat) degrees) {
     [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
         RCTCropView *cropView = (RCTCropView *)viewRegistry[reactTag];
-        UIImage *rotatedImage = [self rotateImage:[cropView getCroppedImage] byDegrees:degrees];
 
-        cropView.onImageSaved(@{
-            @"uri": [self saveRotatedImage:rotatedImage],
-            // ... other properties ...
-        });
+        // Convert degrees to radians
+        CGFloat radians = degrees * M_PI / 180.0;
+
+        // Apply a CGAffineTransform to rotate the image
+        cropView.transform = CGAffineTransformMakeRotation(radians);
+
+        // Notify the view that it needs to redraw
+        [cropView setNeedsDisplay];
     }];
-}
-
-- (UIImage *)rotateImage:(UIImage *)image byDegrees:(CGFloat)degrees {
-    UIGraphicsBeginImageContextWithOptions(image.size, NO, image.scale);
-    CGContextRef context = UIGraphicsGetCurrentContext();
-    CGContextTranslateCTM(context, image.size.width / 2.0, image.size.height / 2.0);
-    CGContextRotateCTM(context, degrees * M_PI / 180.0);
-    CGContextTranslateCTM(context, -image.size.width / 2.0, -image.size.height / 2.0);
-    [image drawInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
-    UIImage *rotatedImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    return rotatedImage;
-}
-
-- (NSString *)saveRotatedImage:(UIImage *)image {
-    NSString *extension = @"jpg"; // Default extension
-
-    // Determine the image format based on the presence of alpha channel
-    if ([[image valueForKey:@"hasAlpha"] boolValue]) {
-        extension = @"png";
-    }
-
-    // Create a unique filename
-    NSString *filename = [NSString stringWithFormat:@"%@.%@", [[NSUUID UUID] UUIDString], extension];
-
-    // Create the file URL
-    NSArray *paths = [[NSFileManager defaultManager] URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask];
-    NSURL *url = [[paths firstObject] URLByAppendingPathComponent:filename];
-
-    // Save the rotated image to the file URL
-    if ([extension isEqualToString:@"png"]) {
-        [UIImagePNGRepresentation(image) writeToURL:url atomically:YES];
-    } else {
-        // You can adjust the compression quality as needed
-        [UIImageJPEGRepresentation(image, 0.9) writeToURL:url atomically:YES];
-    }
-
-    // Return the absolute URL of the saved image
-    return url.absoluteString;
 }
 
 @end
