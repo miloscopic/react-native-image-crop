@@ -1,7 +1,9 @@
-// CropViewManager.m
-// react-native-image-crop
 //
-// Created by Milos Copic on 7/12/2023.
+//  CropViewManager.m
+//  react-native-image-crop-tools
+//
+//  Created by Hunaid Hassan on 31/12/2019.
+//
 
 #import "CropViewManager.h"
 #import "RCTCropView.h"
@@ -11,7 +13,7 @@
 
 RCT_EXPORT_MODULE()
 
-- (UIView *)view {
+-(UIView *)view {
     return [[RCTCropView alloc] init];
 }
 
@@ -20,6 +22,7 @@ RCT_EXPORT_VIEW_PROPERTY(onImageSaved, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(keepAspectRatio, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(cropAspectRatio, CGSize)
 RCT_EXPORT_VIEW_PROPERTY(iosDimensionSwapEnabled, BOOL)
+
 
 RCT_EXPORT_METHOD(saveImage:(nonnull NSNumber*) reactTag
                   preserveTransparency:(BOOL) preserveTransparency
@@ -39,7 +42,7 @@ RCT_EXPORT_METHOD(saveImage:(nonnull NSNumber*) reactTag
 
         if ([[image valueForKey:@"hasAlpha"] boolValue] && preserveTransparency) {
             [UIImagePNGRepresentation(image) writeToURL:url atomically:YES];
-        } else {
+        }else {
             [UIImageJPEGRepresentation(image, [quality floatValue] / 100.0f) writeToURL:url atomically:YES];
         }
 
@@ -61,7 +64,7 @@ RCT_EXPORT_METHOD(rotateImage:(nonnull NSNumber*) reactTag degrees:(CGFloat) deg
         CGFloat radians = degrees * M_PI / 180.0;
 
         // Apply a CGAffineTransform to rotate the image
-        cropView.transform = CGAffineTransformMakeRotation(radians);
+        cropView.transform = CGAffineTransformRotate(cropView.transform, radians);
 
         // Notify the view that it needs to redraw
         [cropView setNeedsDisplay];
