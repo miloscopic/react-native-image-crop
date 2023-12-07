@@ -80,8 +80,30 @@ RCT_EXPORT_METHOD(rotateImage:(nonnull NSNumber*) reactTag degrees:(CGFloat) deg
 }
 
 - (NSString *)saveRotatedImage:(UIImage *)image {
-    // Save rotated image and return its URI
-    // Similar to the saveImage method...
+    NSString *extension = @"jpg"; // Default extension
+
+    // Determine the image format based on the presence of alpha channel
+    if ([[image valueForKey:@"hasAlpha"] boolValue]) {
+        extension = @"png";
+    }
+
+    // Create a unique filename
+    NSString *filename = [NSString stringWithFormat:@"%@.%@", [[NSUUID UUID] UUIDString], extension];
+
+    // Create the file URL
+    NSArray *paths = [[NSFileManager defaultManager] URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask];
+    NSURL *url = [[paths firstObject] URLByAppendingPathComponent:filename];
+
+    // Save the rotated image to the file URL
+    if ([extension isEqualToString:@"png"]) {
+        [UIImagePNGRepresentation(image) writeToURL:url atomically:YES];
+    } else {
+        // You can adjust the compression quality as needed
+        [UIImageJPEGRepresentation(image, 0.9) writeToURL:url atomically:YES];
+    }
+
+    // Return the absolute URL of the saved image
+    return url.absoluteString;
 }
 
 @end
