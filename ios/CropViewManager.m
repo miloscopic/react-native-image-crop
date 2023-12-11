@@ -1,10 +1,3 @@
-//
-//  CropViewManager.m
-//  react-native-image-crop-tools
-//
-//  Created by Hunaid Hassan on 31/12/2019.
-//
-
 #import "CropViewManager.h"
 #import "RCTCropView.h"
 #import <React/RCTUIManager.h>
@@ -63,18 +56,11 @@ RCT_EXPORT_METHOD(rotateImage:(nonnull NSNumber*) reactTag degrees:(CGFloat) deg
         // Convert degrees to radians
         CGFloat radians = degrees * M_PI / 180.0;
 
-        // Create a wrapper view for rotation
-        UIView *rotationWrapper = [[UIView alloc] initWithFrame:cropView.bounds];
-        [cropView addSubview:rotationWrapper];
-
-        // Move the image view to the wrapper view
-        [rotationWrapper addSubview:cropView.imageView];
-
-        // Apply a CGAffineTransform to rotate only the wrapper view
-        rotationWrapper.transform = CGAffineTransformRotate(rotationWrapper.transform, radians);
+        // Apply a CGAffineTransform to rotate only the image within the cropView
+        cropView.transform = CGAffineTransformRotate(cropView.transform, radians);
 
         // Notify the view that it needs to redraw
-        [rotationWrapper setNeedsDisplay];
+        [cropView setNeedsDisplay];
     }];
 }
 
