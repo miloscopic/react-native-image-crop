@@ -101,7 +101,12 @@
 }
 
 - (void)rotateImage:(BOOL)clockwise {
-    [_inlineCropView rotateImageNinetyDegreesAnimated:YES clockwise:clockwise];
+    UIImage *rotatedImage = [_inlineCropView.image croppedImageWithFrame:_inlineCropView.imageCropFrame angle:_inlineCropView.angle circularClip:NO];
+
+    rotatedImage = [rotatedImage rotateInRadians:(clockwise ? M_PI_2 : -M_PI_2)];
+
+    // Update the image in TOCropView
+    [_inlineCropView setImage:rotatedImage];
 }
 
 @end

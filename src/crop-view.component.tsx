@@ -39,7 +39,7 @@ class CropView extends React.PureComponent<Props> {
     UIManager.dispatchViewManagerCommand(
       findNodeHandle(this.viewRef.current!),
       UIManager.getViewManagerConfig('CropView').Commands.saveImage,
-      [preserveTransparency, quality]
+      [preserveTransparency, quality],
     );
   };
 
@@ -47,7 +47,7 @@ class CropView extends React.PureComponent<Props> {
     UIManager.dispatchViewManagerCommand(
       findNodeHandle(this.viewRef.current!),
       UIManager.getViewManagerConfig('CropView').Commands.rotateImage,
-      [degrees]
+      [degrees],
     );
   };
 
