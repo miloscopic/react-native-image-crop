@@ -63,12 +63,27 @@ RCT_EXPORT_METHOD(rotateImage:(nonnull NSNumber*) reactTag degrees:(CGFloat) deg
         // Convert degrees to radians
         CGFloat radians = degrees * M_PI / 180.0;
 
-        // Apply a CGAffineTransform to rotate the image
-        cropView.transform = CGAffineTransformRotate(cropView.transform, radians);
+        // Apply a CGAffineTransform to rotate only the image within the cropView
+        cropView.imageView.transform = CGAffineTransformRotate(cropView.imageView.transform, radians);
 
         // Notify the view that it needs to redraw
-        [cropView setNeedsDisplay];
+        [cropView.imageView setNeedsDisplay];
     }];
 }
+
+// RCT_EXPORT_METHOD(rotateImage:(nonnull NSNumber*) reactTag degrees:(CGFloat) degrees) {
+//     [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
+//         RCTCropView *cropView = (RCTCropView *)viewRegistry[reactTag];
+//
+//         // Convert degrees to radians
+//         CGFloat radians = degrees * M_PI / 180.0;
+//
+//         // Apply a CGAffineTransform to rotate the image
+//         cropView.transform = CGAffineTransformRotate(cropView.transform, radians);
+//
+//         // Notify the view that it needs to redraw
+//         [cropView setNeedsDisplay];
+//     }];
+// }
 
 @end
